@@ -1,0 +1,125 @@
+        -:    0:Source:p3.c
+        -:    0:Graph:p3.gcno
+        -:    0:Data:p3.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include <stdio.h>
+        -:    2:#include <stdlib.h>
+        -:    3:#include <string.h>
+        -:    4:#include <stdbool.h>
+        -:    5:
+        -:    6:typedef struct Event {
+        -:    7:    char* name;
+        -:    8:    int start;
+        -:    9:    int end;
+        -:   10:} Event;
+        -:   11:
+        1:   12:int main () 
+        -:   13:{
+        -:   14:    char str[80], command[80], name[80];
+        1:   15:    int i=0, start=0, end=0, numEvents=0, curTime=0, numPrinted=0, low=0, high=0;
+        1:   16:    struct Event *calendar = malloc(24 * sizeof(Event));
+        -:   17:
+        -:   18:    while (1) {
+        2:   19:        printf("$ ");
+        2:   20:        fgets(str, sizeof(str), stdin);
+        -:   21:        // Tokenize string
+        2:   22:        sscanf(str, "%s %s %d %d", command, name, &start, &end);  
+        -:   23:
+        -:   24:        // Quit
+        2:   25:        if (strcmp(command, "quit") == 0) {
+        2:   26:            for (i = 0; i < numEvents; i++) {
+        1:   27:                free(calendar[i].name);
+        -:   28:            }
+        1:   29:            free(calendar);
+        1:   30:            break;
+        -:   31:        }
+        -:   32:
+        -:   33:        // Add event
+        1:   34:        else if (strcmp(command, "add") == 0) {
+        -:   35:            // Check if we are allowed to add this event:
+        1:   36:            if ((start == 0 && end == 0) || start < 0 || end > 23) {
+    #####:   37:                continue;
+        -:   38:            }
+        1:   39:            bool badInput = false;
+        1:   40:            for (i=0; i < numEvents; i++) {
+    #####:   41:                low = calendar[i].start;
+    #####:   42:                high = calendar[i].end;
+        -:   43:                // Good cases:
+        -:   44:                    // Start & End are both before existing event(s), Start & End are both after existing event(s),
+        -:   45:                    // Start < Low/End == High, Start == Low/End > High
+    #####:   46:                if ((start < low && end <= low) || (start >= high && end > high)) {
+        -:   47:                    // passed the test, just keep looping
+        -:   48:                }
+        -:   49:                else {
+    #####:   50:                    printf("Event overlap error\n");
+    #####:   51:                    badInput = true;
+    #####:   52:                    break;
+        -:   53:                }
+        -:   54:            }
+        1:   55:            if (badInput == true) {
+    #####:   56:                badInput = false;
+    #####:   57:                continue;
+        -:   58:            }
+        -:   59:            // Add event to calendar if conditions above passed
+        1:   60:            struct Event *e = malloc(sizeof(Event));
+        1:   61:            e->name = malloc(strlen(name) + 1);
+        1:   62:            strcpy(e->name, name);
+        1:   63:            e->start = start;
+        1:   64:            e->end = end;
+        1:   65:            calendar[numEvents] = *e;
+        1:   66:            numEvents++;
+        1:   67:            free(e);
+        -:   68:        }
+        -:   69:
+        -:   70:        // Delete event
+    #####:   71:        else if (strcmp(command, "delete") == 0) {
+    #####:   72:            if (numEvents > 0)
+        -:   73:            {
+    #####:   74:                int indexToDelete = 0;
+        -:   75:                // Find the index of the Event we want to delete
+    #####:   76:                for (i = 0; i < numEvents; i++) {
+    #####:   77:                    if (strcmp(calendar[i].name, name) == 0) {
+    #####:   78:                        indexToDelete = i;
+        -:   79:                        // free() the string from indexToDelete in the array
+    #####:   80:                        free(calendar[indexToDelete].name);
+        -:   81:                        // Overwrite the Event to "delete", move all Events after this one down the array
+    #####:   82:                        for (i = indexToDelete; i < numEvents-1; i++) {
+    #####:   83:                            calendar[i] = calendar[i+1];
+        -:   84:                        }
+    #####:   85:                        numEvents--;
+    #####:   86:                        break;
+        -:   87:                    }
+        -:   88:                }
+        -:   89:            }
+        -:   90:        }
+        -:   91:
+    #####:   92:        else if (strcmp(command, "printcalendar") == 0) {
+        -:   93:            // Print in sorted order by start_time. Just print all 0's, 1's, 2's, etc in order.
+    #####:   94:            i = 0, numPrinted = 0, curTime = 0;
+    #####:   95:            while (numPrinted != numEvents && curTime < 24) {
+        -:   96:                // Print if curTime matches start_time
+    #####:   97:                if (calendar[i].start == curTime) {
+    #####:   98:                    printf("%s %d %d\n", calendar[i].name, calendar[i].start, calendar[i].end);
+    #####:   99:                    numPrinted++;
+    #####:  100:                    i++;
+        -:  101:                }
+        -:  102:                // Keep looping around the calendar list
+    #####:  103:                else if (calendar[i].start != curTime) {
+    #####:  104:                    i++;
+        -:  105:                }
+        -:  106:                // Reset loop to look for more items to print, from 0 to 23
+    #####:  107:                if (i == numEvents && numPrinted != numEvents) {
+    #####:  108:                    curTime++;
+    #####:  109:                    i = 0;
+        -:  110:                }
+        -:  111:            }
+        -:  112:        }
+        -:  113:
+        -:  114:        else {
+    #####:  115:            printf("Invalid command, please try again.\n");
+        -:  116:        }
+        1:  117:    }
+        -:  118:
+        1:  119:    return 0;
+        -:  120:}
