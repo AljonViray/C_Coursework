@@ -1,0 +1,9 @@
+
+malloc 3
+malloc 4
+free 6
+malloc 2
+writemem 6 HI
+free 1
+free 6
+quit

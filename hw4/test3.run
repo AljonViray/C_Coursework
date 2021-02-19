@@ -1,0 +1,5 @@
+
+malloc 3
+writemem 1 ABC
+printmem 1 3
+quit

@@ -1,0 +1,8 @@
+
+malloc 3
+malloc 4
+malloc 5
+blocklist
+free 1
+free 6
+quit
